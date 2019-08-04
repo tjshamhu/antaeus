@@ -64,6 +64,26 @@ class AntaeusDal(private val db: Database) {
         return fetchInvoice(id!!)
     }
 
+    fun fetchUpdaidInvoices(): List<Invoice> {
+        return transaction(db) {
+            // Returns all the invoices which do not appear in the FailedSettlementTable.
+            (InvoiceTable leftJoin FailedSettlementTable)
+            .slice(InvoiceTable.id, InvoiceTable.currency, InvoiceTable.value, InvoiceTable.customerId, InvoiceTable.status)
+            .select { (FailedSettlementTable.id.isNull()) and (InvoiceTable.status eq InvoiceStatus.PENDING.toString()) }
+            .map { it.toInvoice() }
+        }
+    }
+
+    fun updateInvoice(invoice: Invoice, status: InvoiceStatus): Int {
+        val id = transaction(db) {
+            // updates an invoice's status.
+            InvoiceTable.update({ InvoiceTable.id eq invoice.id }) {
+                it[this.status] = status.toString()
+            }
+        }
+        return id!!
+    }
+
     fun fetchCustomer(id: Int): Customer? {
         return transaction(db) {
             CustomerTable
