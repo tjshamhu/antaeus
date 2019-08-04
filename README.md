@@ -64,7 +64,7 @@ The next logical step to me was to really deep dive into the code base. To reall
 
 Once I was satisfied that I know enough to navigate around the app, I needed to come up with a plan. A conceptual design. I identified the 2 classes I am mainly concerned about, the PaymentProvider class, and the BillingService class, which needs an instance of the PaymentProvider class as a dependency. The BillingService class delegates the actual process of charging a customer's credit card to the PaymentProvider class. Understanding that this delegation exists is key in modeling how the components of the app are positioned and how they transfer data to and from one another.
 
-xxx data flow diagram xxx
+![Architecture](./App_Architecture.jpg)
 
 Immediately, a few concerns were raised. Handling successful payments is simple and straightforward enough but special attention needed to be paid to the unsucceful payments, Especially when a netowrk error occurs. 
 
@@ -78,7 +78,7 @@ I then decided to create ReconcliationService which will be solely responsible f
 
 So our system flow diagram would look something of this sort.
 
-xxx diagram
+![Flow Diagram](./Data_Flow_Diagram.jpg)
 
 One apparent truth is that, the BillingService and the ReconcliationService has to be scheduled. The BillingService runs every first day of the month, timezones deliberately ignored here for simplicity sake. The ReconcliationService will run on 5 minute intervals, processing each after 5, 30, and 120 minutes intervals, to allow for time for the network to get back up. Obviously I needed some sort of cron service which will schedule my tasks and also a package with allows me to run these tasks on a thread separate from that which the main REST application runs on. Coming from a python background, I know of a package called [Celery](http://www.celeryproject.org/) which does exactly this and so, I looked for a Kotlin equivalent. For this I turned to an open source packaged named [Sundail](https://knowm.org/open-source/sundial/). It had pretty straight forward documentation and so it was a breeze to use.
 
