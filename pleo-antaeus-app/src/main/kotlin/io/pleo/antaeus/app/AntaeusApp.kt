@@ -10,7 +10,6 @@ package io.pleo.antaeus.app
 import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
-import io.pleo.antaeus.core.utils.getPaymentProvider
 import io.pleo.antaeus.core.utils.setupInitialData
 import io.pleo.antaeus.data.AntaeusDal
 import io.pleo.antaeus.data.CustomerTable
@@ -53,15 +52,13 @@ fun main() {
     // Insert example data in the database.
     setupInitialData(dal = dal)
 
-    // Get third parties
-    val paymentProvider = getPaymentProvider()
-
     // Create core services
     val invoiceService = InvoiceService(dal = dal)
     val customerService = CustomerService(dal = dal)
 
     // Start job scheduler
     SundialJobScheduler.startScheduler("io.pleo.antaeus.core.jobs");
+    
     // Create REST web service
     AntaeusRest(
         invoiceService = invoiceService,
