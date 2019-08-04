@@ -48,7 +48,7 @@ class BillingService (
                 }
                 return charged
             } catch (e: CurrencyMismatchException) {
-                // log this, email customer, notify devs
+                // email customer, notify devs
                 logger.info { "Invoice [${invoice.id}] failed to because [CURRENCY_MISMATCH]. [${e.toString()}]" }
                 dal.createFailedSettlement(
                     invoice = invoice, 
@@ -64,7 +64,7 @@ class BillingService (
                 return false
 
             } catch (e: NetworkException) {
-                // log this, notify devs
+                // notify devs
                 logger.info { "Invoice [${invoice.id}] failed to because [NETWORK_ERROR]. [${e.toString()}]" }
                 dal.createFailedSettlement(
                     invoice = invoice, 
@@ -75,12 +75,12 @@ class BillingService (
                 return false
 
             } catch (e: InvoiceNotFoundException) {
-                // log this, notify devs
+                // notify devs
                 logger.info { "Invoice [${invoice.id}] not found. [${e.toString()}]" }
                 return false
 
             } catch (e: Exception) {
-                // log this,  notify devs
+                // notify devs
                 logger.info { "General excpetion occured with Invoice [${invoice.id}]. [${e.toString()}]." }
                 return false
             }

@@ -42,6 +42,8 @@ class ReconciliationService (
     fun attemptResettleInvoice(failedSettlement: FailedSettlement, invoice: Invoice): Boolean {
         try {
             var invoiceIsPaid = false;
+
+            // if the failedSettlement was created due to a network error, we do not know whether it charged or not, we ought to check
             if (failedSettlement.reasonCreated == FailedSettlementReason.NETWORK_ERROR) {
                 invoiceIsPaid = paymentProvider.getPaymentStatus(invoice)
             }
@@ -60,7 +62,7 @@ class ReconciliationService (
                 logger.info { "FailedSettlement [${failedSettlement.id}] verified as not charged. Total attempts: [${failedSettlement.retries + 1}]" }
                 val charged = paymentProvider.charge(invoice)
                 if (charged) {
-                // log invoice paid, notify customer, email billing,
+                    // log invoice paid, notify customer, email billing,
                     dal.updateInvoice(invoice, InvoiceStatus.PAID)
                     dal.updateFailedSettlement(
                         failedSettlement = failedSettlement, 
@@ -82,7 +84,7 @@ class ReconciliationService (
             }
                 
         } catch (e: CurrencyMismatchException) {
-            // log this, email customer, notify devs, create charge attempt
+            // email customer, notify devs, create charge attempt
             dal.updateFailedSettlement(
                 failedSettlement = failedSettlement, 
                 log = e.toString(), 
@@ -119,6 +121,11 @@ class ReconciliationService (
     }
 
     fun hasWaited(failedSettlement: FailedSettlement): Boolean {
+        /*
+            this fun returns true if a certain amount of time has passed since an invoice's last charge attempt.
+            we calculate the waiting period by doing 5 to the power number_of_retries + 1.
+            If the invoice has been retried twice, it ought to wait 125 minutes. i.e: 5 ** 3
+        */ 
         val now = Instant.now().getEpochSecond()
         val timeToWait = Math.pow(5.toDouble(), (failedSettlement.retries + 1).toDouble()) * 60  // 5 minutes to power # of ++retries, times 60 seconds
         val timeNotToExceed = Math.pow(5.toDouble(), (failedSettlement.retries + 2).toDouble()) * 60
