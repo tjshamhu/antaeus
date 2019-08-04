@@ -36,5 +36,9 @@ internal fun getPaymentProvider(): PaymentProvider {
         override fun charge(invoice: Invoice): Boolean {
                 return Random.nextBoolean()
         }
+
+        override fun getPaymentStatus(invoice: Invoice): Boolean {
+                return Random.nextBoolean()
+        }
     }
 }

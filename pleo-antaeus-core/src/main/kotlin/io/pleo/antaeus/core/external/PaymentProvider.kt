@@ -25,4 +25,16 @@ interface PaymentProvider {
      */
 
     fun charge(invoice: Invoice): Boolean
+
+    /*
+        Check whether a receipt exists for a particular invoice.
+
+        Returns:
+          `True` when a recipet exists, signalling a successful payment.
+          `False` when the transaction failed and there is no receipt, eg, insufficient balance, currency mismatch
+
+        Throws:
+          `NetworkException`: when a network error happens.
+     */
+    fun getPaymentStatus(invoice: Invoice): Boolean
 }
