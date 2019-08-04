@@ -24,6 +24,8 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.knowm.sundial.SundialJobScheduler;
+
 
 import java.sql.Connection
 
@@ -58,9 +60,8 @@ fun main() {
     val invoiceService = InvoiceService(dal = dal)
     val customerService = CustomerService(dal = dal)
 
-    // This is _your_ billing service to be included where you see fit
-    val billingService = BillingService(dal = dal, paymentProvider = paymentProvider)
-
+    // Start job scheduler
+    SundialJobScheduler.startScheduler("io.pleo.antaeus.core.jobs");
     // Create REST web service
     AntaeusRest(
         invoiceService = invoiceService,
